@@ -20,6 +20,13 @@ link_into_volume "$DATA/ssh" /app/.ssh
 link_into_volume "$DATA/huggingface" /app/.cache/huggingface
 link_into_volume "$DATA/local" /app/.local
 
+# Upstream's entrypoint only fixes ownership of the volume's top folder on
+# Railway (it treats the mount as a broad host path), so hand the folders
+# and files this script makes to the app user here.
+APP_UID="${PUID:-1000}"; APP_GID="${PGID:-1000}"
+fix_owner() { chown "$APP_UID:$APP_GID" "$@" 2>/dev/null || true; }
+fix_owner "$DATA" "$DATA/logs" "$DATA/ssh" "$DATA/huggingface" "$DATA/local"
+
 # Safe defaults for an internet-facing install.
 export AUTH_ENABLED=true
 export LOCALHOST_BYPASS=false
@@ -59,6 +66,33 @@ os.chmod("/app/data/integrations.json", 0o600)
 print("railway-start: added the bundled ntfy integration")
 PY
 fi
+[ -f "$DATA/integrations.json" ] && fix_owner "$DATA/integrations.json"
+
+# Upstream's compose starts the app after SearXNG and ChromaDB. On Railway
+# all services start together, so wait (up to 3 minutes) until both answer;
+# otherwise vector memory starts in a degraded mode.
+python - <<'PY'
+import os, socket, time
+from urllib.parse import urlparse
+targets = []
+if os.getenv("CHROMADB_HOST"):
+    targets.append(("ChromaDB", os.environ["CHROMADB_HOST"], int(os.getenv("CHROMADB_PORT") or 8000)))
+u = urlparse(os.getenv("SEARXNG_INSTANCE") or "")
+if u.hostname:
+    targets.append(("SearXNG", u.hostname, u.port or 80))
+deadline = time.time() + 180
+for name, host, port in targets:
+    while True:
+        try:
+            socket.create_connection((host, port), timeout=3).close()
+            print(f"railway-start: {name} is up at {host}:{port}", flush=True)
+            break
+        except OSError:
+            if time.time() > deadline:
+                print(f"railway-start: {name} not reachable at {host}:{port}, starting anyway", flush=True)
+                break
+            time.sleep(3)
+PY
 
 # Upstream entrypoint: fixes volume ownership, runs first-time setup
 # (creates the admin from ODYSSEUS_ADMIN_USER / ODYSSEUS_ADMIN_PASSWORD),
