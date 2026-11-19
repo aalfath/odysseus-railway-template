@@ -13,7 +13,7 @@ services:
       CHROMADB_PORT: "8000"
       SEARXNG_INSTANCE: http://searxng:8080
       NTFY_URL: http://ntfy:8080
-      NTFY_TOKEN: tk_localtest00000000000000000000
+      NTFY_TOKEN: localtest00000000000000000000
     volumes: ["odysseus-data:/app/data"]
   chromadb:
     build: ./chromadb
@@ -30,7 +30,7 @@ services:
       NTFY_BASE_URL: http://localhost:8091
       NTFY_ADMIN_USER: admin
       NTFY_ADMIN_PASSWORD: local-test-ntfy-pass
-      NTFY_ODYSSEUS_TOKEN: tk_localtest00000000000000000000
+      NTFY_ODYSSEUS_TOKEN: localtest00000000000000000000
     volumes: ["ntfy-data:/var/lib/ntfy"]
 volumes:
   odysseus-data:

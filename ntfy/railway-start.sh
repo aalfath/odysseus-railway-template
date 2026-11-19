@@ -18,8 +18,11 @@ if [ -z "$HASH" ]; then
 fi
 
 export NTFY_AUTH_USERS="${NTFY_ADMIN_USER}:${HASH}:admin"
+# Access token for Odysseus. ntfy tokens are "tk_" + 29 characters; the
+# template generates the 29 characters and the prefix is added here.
 if [ -n "${NTFY_ODYSSEUS_TOKEN:-}" ]; then
-    export NTFY_AUTH_TOKENS="${NTFY_ADMIN_USER}:${NTFY_ODYSSEUS_TOKEN}:Odysseus"
+    case "$NTFY_ODYSSEUS_TOKEN" in tk_*) TOKEN="$NTFY_ODYSSEUS_TOKEN" ;; *) TOKEN="tk_$NTFY_ODYSSEUS_TOKEN" ;; esac
+    export NTFY_AUTH_TOKENS="${NTFY_ADMIN_USER}:${TOKEN}:Odysseus"
 fi
 
 export NTFY_LISTEN_HTTP=":${PORT:-8080}"

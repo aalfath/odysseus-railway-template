@@ -38,6 +38,9 @@ fi
 if [ -n "${NTFY_URL:-}" ] && [ -n "${NTFY_TOKEN:-}" ] && [ ! -f "$DATA/integrations.json" ]; then
     python - <<'PY'
 import json, os, uuid
+token = os.environ["NTFY_TOKEN"]
+if not token.startswith("tk_"):
+    token = "tk_" + token
 item = {
     "id": uuid.uuid4().hex[:12],
     "preset": "ntfy",
@@ -47,7 +50,7 @@ item = {
     "auth_type": "bearer",
     "auth_header": "",
     "auth_param": "",
-    "api_key": os.environ["NTFY_TOKEN"],
+    "api_key": token,
     "enabled": True,
 }
 with open("/app/data/integrations.json", "w", encoding="utf-8") as f:
