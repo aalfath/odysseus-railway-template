@@ -1,0 +1,13 @@
+use_default_settings: true
+
+server:
+  # Replaced at runtime by the SEARXNG_SECRET variable.
+  secret_key: "set-by-SEARXNG_SECRET"
+  limiter: false
+  public_instance: false
+  image_proxy: false
+
+search:
+  formats:
+    - html
+    - json

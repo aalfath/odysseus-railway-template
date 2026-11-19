@@ -1,0 +1,38 @@
+# Local test of the Railway template: same images, variables and volumes.
+services:
+  odysseus:
+    build: ./odysseus
+    ports: ["7000:7000"]
+    environment:
+      PORT: "7000"
+      ODYSSEUS_ADMIN_USER: admin
+      ODYSSEUS_ADMIN_PASSWORD: local-test-password-123
+      ALLOWED_ORIGINS: http://localhost:7000
+      SECURE_COOKIES: "false"
+      CHROMADB_HOST: chromadb
+      CHROMADB_PORT: "8000"
+      SEARXNG_INSTANCE: http://searxng:8080
+      NTFY_URL: http://ntfy:8080
+      NTFY_TOKEN: tk_localtest00000000000000000000
+    volumes: ["odysseus-data:/app/data"]
+  chromadb:
+    build: ./chromadb
+    volumes: ["chromadb-data:/data"]
+  searxng:
+    build: ./searxng
+    environment:
+      SEARXNG_SECRET: local-test-searxng-secret
+  ntfy:
+    build: ./ntfy
+    ports: ["8091:8080"]
+    environment:
+      PORT: "8080"
+      NTFY_BASE_URL: http://localhost:8091
+      NTFY_ADMIN_USER: admin
+      NTFY_ADMIN_PASSWORD: local-test-ntfy-pass
+      NTFY_ODYSSEUS_TOKEN: tk_localtest00000000000000000000
+    volumes: ["ntfy-data:/var/lib/ntfy"]
+volumes:
+  odysseus-data:
+  chromadb-data:
+  ntfy-data:
