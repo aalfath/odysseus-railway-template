@@ -22,15 +22,21 @@ Nothing to fill in. Railway generates every secret on deploy.
 | Odysseus | `ODYSSEUS_ADMIN_USER` | `admin` |
 | Odysseus | `ODYSSEUS_ADMIN_PASSWORD` | generated; read it in the service's Variables tab to log in |
 | Odysseus | `ALLOWED_ORIGINS` | `https://` + the service's Railway domain |
-| Odysseus | `CHROMADB_HOST`, `CHROMADB_PORT`, `SEARXNG_INSTANCE` | private-network references |
+| Odysseus | `CHROMADB_HOST`, `CHROMADB_PORT`, `SEARXNG_INSTANCE` | private-network references to the other services |
 | Odysseus | `NTFY_URL`, `NTFY_TOKEN` | the bundled ntfy server and its access token (wired in as an integration on first boot) |
-| ntfy | `NTFY_ADMIN_USER`, `NTFY_ADMIN_PASSWORD` | `admin` and a generated password |
+| ntfy | `NTFY_ADMIN_USER`, `NTFY_ADMIN_PASSWORD` | `admin` and a generated password (log in with these in the ntfy phone app) |
+| ntfy | `NTFY_BASE_URL` | `https://` + the ntfy service's Railway domain |
 | ntfy | `NTFY_ODYSSEUS_TOKEN` | generated access token used by Odysseus |
 | SearXNG | `SEARXNG_SECRET` | generated |
+| ChromaDB, SearXNG, ntfy, Odysseus | `PORT` | 8000, 8080, 8080 and 7000 (also what Railway's health checks probe) |
 
 The admin account is created once, on first boot. Changing `ODYSSEUS_ADMIN_PASSWORD` later doesn't change it: use the app's account settings.
 
 LLM providers (OpenAI, Anthropic, OpenRouter, Ollama or any OpenAI-compatible endpoint) are added in the app under Settings after you log in.
+
+## Start order
+
+Odysseus waits up to 3 minutes for ChromaDB and SearXNG to answer before it starts, so the first deploy comes up in the right order even though Railway starts all services together.
 
 ## Updates
 
