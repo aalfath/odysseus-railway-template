@@ -27,6 +27,12 @@ export SECURE_COOKIES="${SECURE_COOKIES:-true}"
 export ODYSSEUS_ADMIN_USER="${ODYSSEUS_ADMIN_USER:-admin}"
 export DATABASE_URL="${DATABASE_URL:-sqlite:////app/data/app.db}"
 
+# Railway's public domain is the browser origin and the OAuth callback base.
+if [ -n "${RAILWAY_PUBLIC_DOMAIN:-}" ]; then
+    export ALLOWED_ORIGINS="${ALLOWED_ORIGINS:-https://$RAILWAY_PUBLIC_DOMAIN}"
+    export OAUTH_REDIRECT_BASE_URL="${OAUTH_REDIRECT_BASE_URL:-https://$RAILWAY_PUBLIC_DOMAIN}"
+fi
+
 # First boot only: wire the bundled ntfy server in as a notification
 # integration (Settings > Integrations), with its access token.
 if [ -n "${NTFY_URL:-}" ] && [ -n "${NTFY_TOKEN:-}" ] && [ ! -f "$DATA/integrations.json" ]; then
